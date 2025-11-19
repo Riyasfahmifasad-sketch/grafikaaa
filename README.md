@@ -1,0 +1,2 @@
+# grafikaaa
+komputer
