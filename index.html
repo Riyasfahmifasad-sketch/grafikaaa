@@ -1,25 +1,281 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafika Komputer</title>
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduAI Progress Tracker</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <button onclick="window.location.href = 'game.html'">Game</button>
     <style>
-      html,
+      :root {
+        --primary: #6366f1;
+        --secondary: #a855f7;
+        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        --card-bg: rgba(255, 255, 255, 0.08);
+        --border: rgba(255, 255, 255, 0.1);
+      }
+
       body {
-        height: 100%;
         margin: 0;
         padding: 0;
-      }
-      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: var(--bg-gradient);
+        background-attachment: fixed;
+        color: #f8fafc;
+        min-height: 100vh;
         display: flex;
         align-items: center;
-        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 850px;
+        margin: 40px auto;
+        padding: 20px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        padding: 25px;
+        border-radius: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 12px;
+      }
+
+      input {
+        flex: 1;
+        padding: 14px 20px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.2);
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      input:focus {
+        border-color: var(--primary);
+        background: rgba(0, 0, 0, 0.4);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      }
+
+      button {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        opacity: 0.9;
+      }
+
+      h3 {
+        margin-top: 0;
+        color: #cbd5e1;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #rekomendasi {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #e2e8f0;
+        border-left: 4px solid var(--secondary);
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9rem;
+        color: #94a3b8;
+        letter-spacing: 1px;
+      }
+
+      /* Styling Chart Tooltip & Grid */
+      #progressChart {
+        max-height: 350px;
       }
     </style>
-</head>
-<body>
-    <script src="sketch.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.min.js"></script>
-</body>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>📊 EduAI Tracker</h1>
+
+      <div class="card">
+        <canvas id="progressChart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <input
+            type="number"
+            id="nilaiInput"
+            placeholder="Input nilai tes baru (0-100)"
+          />
+          <button onclick="tambahData()">Update Progress</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🤖 AI Smart Analysis</h3>
+        <p id="rekomendasi">Menganalisis data Anda...</p>
+      </div>
+
+      <footer>PROYEK EDUAI © 2026 • SMART LEARNING</footer>
+    </div>
+
+    <script>
+      const ctx = document.getElementById("progressChart").getContext("2d");
+
+      // Custom Gradient for Chart
+      let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, "rgba(99, 102, 241, 0.5)");
+      gradient.addColorStop(1, "rgba(99, 102, 241, 0)");
+
+      let dataNilai = [65, 72, 80];
+      let labelWaktu = ["Tes 1", "Tes 2", "Tes 3"];
+
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labelWaktu,
+          datasets: [
+            {
+              label: "Perkembangan Nilai",
+              data: dataNilai,
+              borderColor: "#818cf8",
+              backgroundColor: gradient,
+              fill: true,
+              borderWidth: 4,
+              tension: 0.4,
+              pointBackgroundColor: "#fff",
+              pointBorderColor: "#818cf8",
+              pointRadius: 6,
+              pointHoverRadius: 8,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: "#94a3b8",
+                font: { family: "Plus Jakarta Sans" },
+              },
+            },
+            y: {
+              grid: { color: "rgba(255, 255, 255, 0.05)" },
+              ticks: {
+                color: "#94a3b8",
+                font: { family: "Plus Jakarta Sans" },
+              },
+              beginAtZero: true,
+              max: 100,
+            },
+          },
+        },
+      });
+
+      function tambahData() {
+        const input = document.getElementById("nilaiInput");
+        const nilaiBaru = parseInt(input.value);
+
+        if (isNaN(nilaiBaru) || nilaiBaru < 0 || nilaiBaru > 100) {
+          alert("Mohon masukkan nilai yang valid (0-100)");
+          return;
+        }
+
+        dataNilai.push(nilaiBaru);
+        labelWaktu.push("Tes " + dataNilai.length);
+
+        chart.update();
+        buatRekomendasi();
+        input.value = "";
+      }
+
+      function buatRekomendasi() {
+        let n = dataNilai.length;
+        let terakhir = dataNilai[n - 1];
+        let sebelumnya = dataNilai[n - 2] || terakhir;
+
+        let pesan = "";
+        let statusIcon = "🚀";
+
+        if (terakhir < 70) {
+          pesan =
+            "Fokus pada penguatan konsep dasar. Jangan ragu untuk bertanya pada mentor.";
+          statusIcon = "📚";
+        } else if (terakhir <= 85) {
+          pesan =
+            "Pertahankan! Kamu sudah di jalur yang benar. Coba tantang dirimu dengan soal variasi.";
+          statusIcon = "✏️";
+        } else {
+          pesan =
+            "Luar biasa! Kamu sudah menguasai materi ini. Saatnya eksplorasi topik tingkat tinggi (HOTS).";
+          statusIcon = "🌟";
+        }
+
+        let tren = "";
+        if (terakhir < sebelumnya) {
+          tren =
+            " <br><small style='color: #fb7185'>⚠️ Ada penurunan dari tes sebelumnya. Tetap semangat dan evaluasi belajarmu!</small>";
+        } else if (terakhir > sebelumnya) {
+          tren =
+            " <br><small style='color: #4ade80'>🔥 Tren positif! Terus tingkatkan performamu.</small>";
+        }
+
+        document.getElementById("rekomendasi").innerHTML =
+          `<strong>${statusIcon} AI Insight:</strong> ${pesan}${tren}`;
+      }
+
+      buatRekomendasi();
+    </script>
+  </body>
 </html>

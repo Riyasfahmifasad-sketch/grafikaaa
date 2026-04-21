@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduQuest Modern</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: white;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      #question {
+        font-size: 22px;
+        margin: 20px 0;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        background: linear-gradient(135deg, cyan, blue);
+        color: white;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px cyan;
+      }
+
+      .score-box {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+      }
+
+      .level {
+        font-weight: bold;
+        color: cyan;
+      }
+
+      .progress {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        margin-top: 10px;
+      }
+
+      .progress-bar {
+        height: 10px;
+        width: 0%;
+        background: cyan;
+        border-radius: 10px;
+        transition: 0.5s;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>🎮 EduQuest</h1>
+      <p>Asah kemampuanmu dengan cara seru!</p>
+
+      <h3 id="question">Loading...</h3>
+      <div id="answers"></div>
+
+      <div class="score-box">
+        <p>Skor: <span id="score">0</span></p>
+        <p>Level: <span id="level" class="level">Beginner</span></p>
+        <div class="progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let score = 0;
+      let level = "Beginner";
+
+      const questions = [
+        { q: "5 + 3 = ?", a: ["6", "8", "9"], correct: "8" },
+        { q: "10 - 4 = ?", a: ["6", "5", "7"], correct: "6" },
+        { q: "6 x 2 = ?", a: ["12", "10", "8"], correct: "12" },
+      ];
+
+      function loadQuestion() {
+        let q = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById("question").innerText = q.q;
+
+        let answersHTML = "";
+        q.a.forEach((ans) => {
+          answersHTML += `<button onclick="checkAnswer('${ans}','${q.correct}')">${ans}</button>`;
+        });
+
+        document.getElementById("answers").innerHTML = answersHTML;
+      }
+
+      function checkAnswer(ans, correct) {
+        if (ans === correct) {
+          score += 10;
+        } else {
+          score -= 5;
+        }
+
+        updateLevel();
+        updateUI();
+        loadQuestion();
+      }
+
+      function updateLevel() {
+        if (score > 70) {
+          level = "Advanced";
+        } else if (score > 30) {
+          level = "Intermediate";
+        } else {
+          level = "Beginner";
+        }
+      }
+
+      function updateUI() {
+        document.getElementById("score").innerText = score;
+        document.getElementById("level").innerText = level;
+
+        let progress = Math.min(score, 100);
+        document.getElementById("progressBar").style.width = progress + "%";
+      }
+
+      loadQuestion();
+    </script>
+  </body>
+</html>
